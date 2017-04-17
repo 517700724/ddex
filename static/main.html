@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<link rel="Shortcut Icon" href="favicon.ico">
+<link href="css/base.css" rel="stylesheet">
+<script src="js/base.js" type="text/javascript"></script>
+<title>DDEX 加载中</title>
+</head>
+<body style="margin: 0;padding: 0;overflow: hidden;">
+  <div id="board" style="z-index:9999;width: 100%;height: 100%;filter: alpha(opacity=70); opacity: 0.7;position: fixed;background: white url('img/loading.gif') 50% 50% no-repeat;"></div>
+  <div id="msg_board" tabindex="0" class="hidden" style="background-color: gray;position: fixed;
+    z-index:9999;width: 100%;height: 100%;filter: alpha(opacity=70); opacity: 0.7;position: fixed;">
+   <div id="msg_bord_content" style="font-size:23px;width:45%;color:white;margin:auto;text-align: center;font-weight: bolder;"></div>   
+  </div>
+  <div id="main_top" class="hidden">
+   <div style="margin: 6px 20px 18px 20px;padding: 10px 20px 5px 20px;color:#6A6A6A;border: 1px solid #E9E9E9;border-radius: 6px;box-shadow: 0px 0px 9px 3px #FBFBFB;">
+    <div style="display:inline-block;width:50%;">欢迎登录 <i id="main_top_username"></i></div><div 
+     style="display:inline-block;width:50%;text-align: right;">
+     <a href="javascript:base.goSrc();" target="_main">
+      <img src="img/home.png" height="15">Home</a>
+     <span class="padding-left=10px noselect">　</span>
+     <a href="javascript:base.goSrc('static/reportView.html');" target="_main">Report</a>
+     <span class="padding-left=10px noselect">　</span>
+     <a href="javascript:base.search.tosrc='';base.goLogin();" target="_main" onclick="$.post('user/logout');">
+      <img src="img/user.png" height="15">Logout</a>
+
+    </div>
+   </div>
+  </div>
+  <iframe name="show" src="" style="border: none;" id="main_iframe" onerror="loadStart(this.contentDocument,this.contentWindow);" onload="window.loadInit&&loadInit(this.contentDocument,this.contentWindow);" height="100%" width="100%">请使用现代浏览器！</iframe>
+  <div id="scrollNavbar" class="hidden">
+   <div style="position: fixed;right: 30px;bottom: 30px;">
+    <button id="main_btn_up" title="回到顶部" style="height:34px;width:34px;cursor:pointer;">顶</button>
+   </div>
+  </div>
+</body>
+<script type="text/javascript">
+var username1 = sessionStorage.getItem("username1");
+if(!username1 || username1 != base.search.username){
+  base.goLogin();
+}
+ document.getElementById("main_top_username").innerText = base.search.username||"";
+ document.getElementById("main_top_username").textContent = base.search.username||"";
+ document.getElementById("main_iframe").src = base.search.tosrc+base.toSearchStr(top.base.search);
+ top.showBoard = function(){top.document.getElementById("board").className = "";};
+ top.hideBoard = function(){top.document.getElementById("board").className = "hidden";};
+ function loadInit(ele,win){
+  document.title = "DDEX " + ele.title;
+  var _top = document.createElement("DIV");
+  _top.innerHTML = document.getElementById("main_top").innerHTML;
+  ele.body.insertBefore(_top,ele.body.firstChild);
+  document.getElementById("main_btn_up").onclick=(function(){ele.body.scrollTop=0;ele.documentElement.scrollTop=0;});
+  ele.addEventListener("scroll", function(){
+   if(ele.body.scrollTop > 200 || ele.documentElement.scrollTop > 200){
+    document.getElementById("scrollNavbar").className = "";
+   } else {
+    document.getElementById("scrollNavbar").className = "hidden";
+  }});
+ }
+ 
+ function loadStart(ele,win){
+  console.log("loadStart");
+  if (win.$){
+   win.$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+//     console.log(settings.async);
+     top.showBoard&&top.showBoard();
+     if (!settings.async) {
+     }
+    },
+    complete : function(xhr, status) {
+     top.hideBoard &&
+     setTimeout(function(){
+      top.hideBoard();
+     },400);
+     if (xhr.responseJSON.code != 0) {
+      alert(xhr.responseJSON.msg);
+      if (data.code == -3) {
+       base.goLogin();
+      }
+      return;
+     }
+    }
+   });
+   win.$.ajax();
+  }
+ }
+//
+ window.onload=(function(){
+  window.onresize=(function(){
+   document.getElementById("main_iframe").setAttribute("height",window.innerHeight);
+  });
+  window.onresize();
+ });
+</script>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+  <link href="css/base.css" rel="stylesheet">
+  <script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+  <script src="js/bootstrap.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="js/base.js"></script>
+  <script type="text/javascript" src="js/base-table.js"></script>
+  <script type="text/javascript" src="js/base-popmenu.js"></script>
+  <script type="text/javascript" src="js/public-page.js"></script>
+  <script type="text/javascript">
+   var table;
+   var _page = new Paging();
+   var length = 15;
+   var serchParameters = {offset:0,length, albumid:base.search.albumid};
+   function upPage(pageNo){
+     scroll(0,0);
+     queryList(pageNo);
+   }
+/**
+  * page：需要查询的页码
+  */
+  function queryList(page){
+    serchParameters.offset = (page-1)*length;
+    $.post("DiaryInfo/getDiaryGrid",base.toSearchStr(serchParameters),function(data){
+    // 错误的处理
+    if(data.responseHeader.status != 00) {
+      alert(data.responseHeader.errorinfo, data.responseHeader.status == 1009 ? function(){base.goLogin();} : null);
+      return;
+    }
+   // 刷新数据
+   table.clearData();
+   for (var int = 0; int < data.response.docs.length; int++) {
+    table.createRowCells(data.response.docs[int]);
+  }
+  table.freshDom();
+   // 刷新分页控制条
+
+   _page.init({
+   PageNum:5,   //_PageNum每页链接数
+   rows:length,   //_rows每页行数
+   totalCount:data.response.numFound,   //_totalCount数据总计
+   divId:"pagea"      //分页所在div的id
+ },page-1);
+
+
+ },"json");
+  }
+</script>
+<style type="text/css">
+ td[index='2'],td[index='3'] {
+  word-break: break-word;
+}
+</style>
+<title>首页</title>
+<style>
+  .zone_pager {
+    margin-top: 20px;
+    overflow: auto;
+    width: 100%;
+  }
+  .zone_pager ul{ float:right}
+  .zone_pager ul li {
+    color: #888;
+    float: left;
+    height: 32px;
+    line-height: 30px;
+    margin-right: 10px;
+    list-style:none;
+  }
+  .zone_pager ul li div {
+    border: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 12px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    width: 36px;
+  }
+  .zone_pager ul li a:link {
+    color: #c0c0c0;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="nowrap-table" style="margin:10px 20px 0 20px;min-width: 715px;">
+   <div class="panel panel-default">
+    <table id="table" class="table table-hover table-condensed table-striped"></table>
+  </div>
+</div>
+<div id="pagea" class="zone_pager"></div>
+<script type="text/javascript">
+ $(function(){
+  table = new Table({id:"table",hasHeadBar:true,onsearch:function(_serchParameters){
+   serchParameters = _serchParameters;
+   serchParameters.offset=0;
+   serchParameters.length=length;
+   queryList(1);
+ }});
+table.createHeads([{html:"ID",title:"序号",key:"diaryID",type:"number",errorMsg:"序号必须为数字！"},{html:"album id",title:"专辑序号",key:"albumID",type:"number",defaultValue:(base.search.albumid?base.search.albumid:""),errorMsg:"序号必须为数字！"},{html:"file name",title:"文件名",key:"fileName",initer:function(statu,rowAtt,ele,parentEle){return rowAtt.filePath + '/' + rowAtt.fileName}},
+{html:"description",title:"描述",key:"description"/* ,type:"no" */},
+{html:"modify date",title:"更新时间",key:"modifyDate",type:"dateTime",errorMsg:"日期格式必须为“YYYY-MM-DD HH:mm:SS”！",style:"width:152px;"},
+  {html:"Status",style:"width:88px;",title:"状态",key:"statusID",bar:{html:'<select id="album_status" class="noborder" onchange="this.parentElement.setAttribute(\'value\',$(\'#album_status option:selected\').val());table.search();"><option value="">All</option><option value="0">Success</option><option value="1">LostORI</option><option value="2">LostAudio</option><option value="3">XMLExc</option><option value="4">TooLong</option><option value="5">DupOri</option><option value="6">UnComplete</option></select>'},
+  initer:function(statu,rowAtt,ele,parentEle){
+    switch (statu) {
+      case 0:
+      return "Success";
+      case 1:
+      return "LostORI";
+      case 2:
+      return "LostAudio";
+      case 3:
+      return "XMLExc";
+      case 4:
+     // parentEle.title = rowAtt.description;
+      parentEle.className = "error";
+      return "TooLong";
+      case 5:
+      return "DupOri";
+      case 6:
+      return "UnComplete";
+      default:
+      return "其它";
+    }
+  }}]);
+
+table.initDom();
+queryList(1);
+
+new PopMenu({
+  check : function(target) {
+   var target =	$(target).parents("tr").attr("statusid");
+   if(target==1){
+    return false;   
+  }else{
+    return true;
+  } 
+},
+dom : table.getDom("body"),
+items : [ {
+ html : "albuminfo",
+ click : function(ep, ec) {
+  base.search.albumid = $(ep).parents("tr").children("[index=1]").html();
+  base.search.cpName = $(ep).parents("tr").children("[index=2]").html();
+  base.openSrc("static/albuminfo.html");
+}
+}, {
+ html : "iteminfo",
+ click : function(ep, ec) {
+  base.search.albumid = $(ep).parents("tr").children("[index=1]").html();
+  base.search.cpName = $(ep).parents("tr").children("[index=2]").html();
+  base.openSrc("static/iteminfo.html");
+}
+}, {
+ html : "import diary",
+ click : function(ep, ec) {
+  base.search.albumid = $(ep).parents("tr").children("[index=1]").html();
+  base.openSrc("static/diaryimp.html");
+}
+}]
+});
+});
+</script>
+</body>
+</html>

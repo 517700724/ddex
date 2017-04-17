@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+  <link href="css/base.css" rel="stylesheet">
+  <script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+  <script src="js/bootstrap.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="js/base.js"></script>
+  <script type="text/javascript" src="js/base-table.js"></script>
+  <script type="text/javascript" src="js/base-popmenu.js"></script>
+  <script type="text/javascript" src="js/public-page.js"></script>
+  <script type="text/javascript">
+  top.window.name = "main";
+   var table;
+   var _page = new Paging();
+   var length = 15;
+   var serchParameters = {offset:0,length};
+   function upPage(pageNo){
+     scroll(0,0);
+     queryList(pageNo);
+   }
+/**
+  * page：需要查询的页码
+  */
+  function queryList(page){
+    serchParameters.offset = (page-1)*length;
+    $.post("AlbumInfo/getAlbumGrid",base.toSearchStr(serchParameters),function(data){
+   // 刷新数据
+   table.clearData();
+   $('#table thead input[type=checkbox]').prop('checked',false);
+   if(data.responseHeader.status==00){
+      dataList(data.response,page);
+    }else{
+      table.freshDom();
+      $("#pagea").html("");
+    }
+},"json");
+  }
+function dataList(p,page){
+    for (var int = 0; int < p.docs.length; int++) {
+      p.docs[int].check = "input:check";
+      table.createRowCells(p.docs[int]);
+    }
+    table.freshDom();
+    // 刷新分页控制条
+    _page.init({
+     PageNum:5,   //_PageNum每页链接数
+     rows:length,   //_rows每页行数
+     totalCount:p.numFound,   //_totalCount数据总计
+     divId:"pagea"      //分页所在div的id
+    },page-1);  
+}  
+</script>
+<title>首页</title>
+<style>
+  .zone_pager {
+    margin-top: 20px;
+    overflow: auto;
+    width: 100%;
+  }
+  .zone_pager ul{ float:right}
+  .zone_pager ul li {
+    color: #888;
+    float: left;
+    height: 32px;
+    line-height: 30px;
+    margin-right: 10px;
+    list-style:none;
+  }
+  .zone_pager ul li div {
+    border: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 12px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    width: 36px;
+  }
+  .zone_pager ul li a:link {
+    color: #c0c0c0;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div style="margin: 10px 25px 0 25px;">
+   <input value="推送上线" type="button" id="btn-send" title="推送至线上CMS">
+   <input value="取消推送" type="button" id="btn-cancel" title="提交推送上线后，在系统真正执行推送之前可以取消。">
+   <a title="查看ddex导入程序的运行结果" style="float: right;margin-right: 10px;" href="javascript:base.search.albumid='';base.goSrc('static/diaryimp.html');">
+    <img src="img/diary-imp.png" height="22">导入日志</a>
+  </div>
+  <div class="nowrap-table" style="margin:10px 20px 0 20px;min-width: 715px;">
+   <div class="panel panel-default">
+    <table id="table" class="table table-hover table-condensed table-striped table-bordered"></table>
+  </div>
+</div>
+<div id="pagea" class="zone_pager"></div>
+<script type="text/javascript">
+ $(function(){
+  table = new Table({id:"table",hasHeadBar:true,onsearch:function(_serchParameters){
+   serchParameters = _serchParameters;
+   serchParameters.offset=0;
+   serchParameters.length=length;
+   queryList(1);
+ }});
+  table.createHeads([{key:"check",bar:{html:"<input class='table-check' type='checkbox' onchange=\"$('#table tbody input[type=checkbox]').prop('checked',this.checked);\">"}},
+    {html:"ID",title:"序号",key:"albumID",type:"number",errorMsg:"序号必须为数字！"},
+    {html:"Supplier",title:"代理商",key:"supplier"},
+    {html:"Provider",title:"唱片公司",key:"provider"},
+    {html:"Album Name",title:"唱片名字",key:"albumName"},
+    {html:"Artist",title:"演唱者",key:"artistName"},
+    {html:"CDs",title:"盘片数量",key:"disks",type:"number",errorMsg:"盘片数量必须为数字！"},
+    {html:"Tracks",title:"歌曲数量",key:"tracks",type:"number",errorMsg:"歌曲数量必须为数字！"},
+    {html:"Release",title:"发布日期",key:"releaseDate",type:"date",errorMsg:"发布日期格式必须为“YYYY-MM-DD”！",style:"width:88px;"},
+    {html:"Status",style:"width:88px;",title:"状态",key:"statusID",bar:{html:'<select id="album_status" class="noborder" onchange="this.parentElement.setAttribute(\'value\',$(\'#album_status option:selected\').val());table.search();"><option value="">全部</option><option value="702">下架</option><option value="700">正在推送</option><option value="707">未转档</option><option value="701">已推送</option><option value="709">未推送</option><option value="704">异常</option><option value="705">转档失败</option><option value="708">解析出错</option></select>'},
+    initer:function(statu,rowAtt,ele,parentEle){
+      if (rowAtt.errorDesc)
+       parentEle.title = rowAtt.errorDesc;
+     switch (statu) {
+      case 700:
+      return "正在推送";
+      case 701:
+      return "已推送";
+      case 709:
+      return "<span style='color:#333; font-weight:bold;'>未推送</span>";
+      case 702:
+      return "下架";
+      case 704:
+      parentEle.className = "error";
+      return "异常";
+      case 705:
+      return "转档失败";
+      case 707:
+      return "未转档";
+      case 708:
+      return "解析出错";
+      default:
+      return "未知";
+    }
+  }}]);
+
+  table.initDom();
+  queryList(1);
+
+  new PopMenu({
+    dom : table.getDom("body"),
+    flag:true,
+    items : [ {
+     html : "albuminfo",
+     click : function(ep, ec) {
+      base.search.albumid = $(ep).parents("tr").children("[index=1]").html();
+      base.search.cpName = $(ep).parents("tr").children("[index=2]").html();
+      base.search.statusid = $(ep).parents("tr").attr("statusid");
+      base.openSrc("static/albuminfo.html");
+    }
+  }, {
+   html : "iteminfo",
+   click : function(ep, ec) {
+    base.search.albumid = $(ep).parents("tr").children("[index=1]").html();
+    base.search.cpName = $(ep).parents("tr").children("[index=2]").html();
+    base.search.statusid = $(ep).parents("tr").attr("statusid");
+    base.openSrc("static/iteminfo.html");
+  }
+}, {
+ html : "import diary",
+ click : function(ep, ec) {
+  base.search.albumid = $(ep).parents("tr").children("[index=1]").html();
+  base.openSrc("static/diaryimp.html");
+}
+},'|', {
+ html : "select",
+ click : function(ep, ec) {
+  $(ep).parents("tr").children("[index=0]").children().prop("checked",!$(ep).parents("tr").children("[index=0]").children().prop("checked"));
+}
+} ]
+});
+  $("#btn-cancel").click(function() {
+    var ids = [];
+    $('input:checked', table.getDom('body')).parents("tr").children("[index=1]").each(function(i, e) {
+     ids.push(e.innerText || e.textContent);
+   });
+    if (ids.length == 0) {
+     alert("请选择专辑！");
+     return;
+   }
+   ids = ids.join(",");
+   $.post("AlbumInfo/pushCMSCancel", base.toSearchStr({
+     albumids : ids
+   }), function(data) {
+     serchParameters.offset=0;
+     serchParameters.length=length;
+       // 错误的处理
+       if(data.responseHeader.status != 00) {
+        alert(data.responseHeader.errorinfo, data.responseHeader.status == 1009 ? function(){base.goLogin();} : null);
+        return;
+      }
+      alert(data.responseHeader.errorinfo);
+    }, "json");
+ });
+  $("#btn-send").click(function() {
+    var ids = [];
+    $('input:checked', table.getDom('body')).parents("tr").children("[index=1]").each(function(i, e) {
+     ids.push(e.innerText || e.textContent);
+   });
+    if (ids.length == 0) {
+     alert("请选择专辑！");
+     return;
+   }
+   ids = ids.join(",");
+   $.post("AlbumInfo/pushCMS", base.toSearchStr({
+     albumids : ids
+   }), function(data) {
+     serchParameters.offset=0;
+     serchParameters.length=length;
+       // 错误的处理
+       if(data.responseHeader.status != 00) {
+        alert("处理失败", data.responseHeader.status == 1009 ? function(){base.goLogin();} : null);
+        return;
+      }
+      alert(data.responseHeader.errorinfo);
+    }, "json");
+ });
+});
+
+</script>
+</body>
+</html>

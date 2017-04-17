@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<link rel="Shortcut Icon" href="favicon.ico">
+<link href="css/base.css" rel="stylesheet">
+<script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+<script src="js/jquery.cookie.js" type="text/javascript"></script>
+<script src="js/base.js" type="text/javascript"></script>
+<style type="text/css">
+#main_panel {
+ width:472px;
+ margin: 120px auto;
+ background: -webkit-gradient(linear, 0 0, 0 100%, from(#EDEDED), to(#FDFDFD));
+ background: -moz-linear-gradient(top, #EDEDED, #FDFDFD);
+}
+
+</style>
+<title>DDEX 登录</title>
+</head>
+<body>
+ <div id="msg_board" tabindex="0" class="hidden" style="background-color: gray;position: fixed; top:0;left:0;
+   z-index:9999;width: 100%;height: 100%;filter: alpha(opacity=70); opacity: 0.7;position: fixed;">
+  <div id="msg_bord_content" style="font-size:23px;width:45%;color:white;margin:auto;text-align: center;font-weight: bolder;"></div>   
+ </div>
+ <div id="main_panel" class="shadow" style="border-radius: 5px;">
+  <div class="row" style="background-color: #FDFDFD;border-radius: 5px;"><img src="img/login-log.png" style="border-radius: 5px;"></div>
+  <div style="padding: 20px 10px 10px 10px; font-size:20px;">
+   <div class="row line-height=65px"><label class="text-align=right width=135px b">Username: </label>
+    <input id="username" placeholder="Username" style="line-height:35px;font-size:18px;height:35px;"></div>
+   <div class="row line-height=65px"><label class="text-align=right width=135px b">Password: </label>
+    <input id="password" placeholder="Password" style="line-height:35px;font-size:18px;height:35px;" type="password">
+    </div>
+    <div style="width:100%; overflow:auto;" id="validateCode_div"></div>
+   <div class="row line-height=65px child-center">
+    <input id="btn_reset" type="button" value="Reset" style="height:40px;width:80px;font-size:20px; margin-right:30px;">
+    <input id="btn_submit" type="button" value="Login" style="height:40px;width:80px;font-size:20px;">
+   </div>
+   <div class="row line-height=16px child-center">
+    <div><input id="remember" type="checkbox" style="height:16px;"><i class="font-size=15px">Remember me</i></div>
+   </div>
+  </div>
+ </div>
+ <script type="text/javascript">
+ 	$(function(){
+ 	 $("#remember").prop("checked",$.cookie("checked")!=null);
+ 	 $("#username").val($.cookie("username"));
+ 	 $("#password").val($.cookie("password"));
+ 	 $(window).bind('keypress',function(event){
+      if(event.keyCode == "13"){
+       // $('#btn_submit').click();
+       if($("#msg_board").is(":hidden")){
+          loginPost();
+       }else{
+          $("#msg_board").addClass('hidden');
+          $("#imgcode").val("").focus();
+       }
+      }
+ 	 });
+ 	 $("#btn_reset").click(function(){$("#username,#password,#imgcode").val("");$("#username").focus();});
+ 	 $.ajaxSetup({async : false});
+ 	 $("#btn_submit").click(function(){
+      loginPost();
+ 	 });
+ 	});
+  function loginPost(){
+      $.post("UserInfo/login",{username:$("#username").val(),password:$("#password").val(),verifycode:$("#imgcode").val()},function(result){
+     if (result.responseHeader.status != 00) {
+      alert(result.responseHeader.errorinfo, document.getElementById("validateCodeImg").click());
+      return;
+     }
+       if ($("#remember").prop("checked")) {
+        $.cookie("checked",3,{expires:3});
+        $.cookie("username",$("#username").val(),{expires:3});
+        $.cookie("password",$("#password").val(),{expires:3});
+       }
+       base.search.username=result.response.docs[0].nickname;
+       sessionStorage.setItem("username1",result.response.docs[0].nickname);
+    // console.log(sessionStorage.getItem("username1"));
+       base.goSrc(base.search.tosrc);
+    },"json");   
+  }
+ </script>
+ <script>
+$(function(){
+  $("#validateCode_div").html("<input type='text' style='margin-left: 150px;width:110px;height:28px;font-size:16px;color:#555;margin-top:5px;border:1px solid #e3e3e3;border-radius:5px' id='imgcode' placeholder='验证码'/>"+
+      "<img src='UserInfo/getVerifyCode' style='width:65px;margin-top:5px;float:right;margin-right:98px;' onclick='changeImg(this,\"n1\")' title='验证码看不清，换一张' id='validateCodeImg'/>");
+});
+
+  function changeImg(obj,createTypeFlag){ 
+    document.getElementById(obj.id).src="UserInfo/getVerifyCode?createTypeFlag="+Math.random();
+}
+ </script>
+</body>
+</html>

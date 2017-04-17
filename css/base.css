@@ -1,0 +1,136 @@
+body {
+ font-size: 14px;
+ color: #6A6A6A;
+}
+
+/* 全局动画  */
+* {
+ transition-property: all;
+ transition-duration: 0.3s;
+ transition-timing-function: ease;
+}
+
+.notransition,.notransition *{
+ transition-property: none;
+}
+
+.error {
+ color: red;
+ font-weight: bolder;
+}
+
+.hidden {
+ display: none;
+}
+
+/* 定位 */
+.top {
+ vertical-align: top;
+}
+
+.middle {
+ vertical-align: middle;
+}
+
+.bottom {
+ vertical-align: bottom;
+}
+.child-top>* {
+ vertical-align: top;
+}
+
+/* 垂直方向居中 */
+.child-middle>* {
+ vertical-align: middle;
+}
+
+.child-bottom>* {
+ vertical-align: bottom;
+}
+
+/* 水平方向居中 */
+.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+
+.left {
+ position: relative;
+ left: 0;
+}
+
+.right {
+ position: relative;
+ right: 0;
+}
+
+.child-left {
+ text-align: left;
+}
+
+.child-center {
+ text-align: center;
+}
+
+.child-right {
+ text-align: right;
+}
+
+/* 盒子布局*/
+.noborder {
+ border: none;
+}
+
+.border {
+ border: 1px solid #49494A;
+}
+
+.shadow {
+ box-shadow: 0px 0px 12px 2px gray;
+}
+
+.shadow-5 {
+ box-shadow: 0px 0px 12px 5px gray;
+}
+
+/* 保持在一行*/
+.row>* {
+ display: inline-block;
+}
+
+.border-bottom {
+ border: none;
+ border-bottom: 1px solid #49494A;
+}
+
+/* 不可选择文本 */
+.noselect {
+ cursor: default;
+}
+
+.b {
+ font-weight: bolder;
+}
+
+button,input {
+ /* vertical-align: middle; */
+ border-radius: 4px;
+ color: #555;
+ background-color: #fff;
+ border: 1px solid #ccc;
+ line-height: 20px;
+ padding: 2px 5px 2px 5px;
+}
+
+label {
+ margin: 0 5px 0 5px;
+}
+
+table>thead>tr>td:not(:first-child) {
+ border-left: 1px solid #DDDDDD;
+}
+
+.nowrap-table table thead {
+ white-space:nowrap;
+}
+

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DDEX WEB API TEST PAGE</title>
+<style type="text/css">
+input[type="text"] {
+ width: 70%;
+ height: 12px;
+ padding: 5px;
+ border-top: none;
+ border-left: none;
+ border-right: none;
+ border-bottom: 1px solid gray;
+}
+
+.jsonDiv {
+ display: table-cell;
+ padding-left: 25px;
+}
+
+body>div {
+ margin: 20px;
+}
+body>div>label{
+ margin: 30px;
+}
+</style>
+<script type="text/javascript">
+ var U = U || {};
+ /**
+  * 发送 ajax post 请求
+  */
+ U.ajax = function(method, header, url, values, callbackSucceed, callbackError) {
+  try {
+   var ajax = new XMLHttpRequest();
+   ajax.onreadystatechange = function() {
+    if (4 != ajax.readyState) {
+     return;
+    }
+    if (200 == ajax.status)
+     callbackSucceed(ajax.responseText);
+    else
+     callbackError(ajax.status);
+   };
+   ajax.open(method, url, true);
+   for ( var param in header) {
+    ajax.setRequestHeader(param, header[param]);
+   }
+   ajax.send(values);
+  } catch (e) {
+   callbackError(e);
+  }
+ };
+
+ U.post = function(url, values, callbackSucceed, callbackError) {
+  var header = {};
+  header["Content-type"] = "application/x-www-form-urlencoded";
+  U.ajax("POST", header, url, values, callbackSucceed, callbackError);
+ };
+
+ U.drawJson = function(jsonObj) {
+  var _toStr = Object.prototype.toString.call(jsonObj);
+  if (_toStr != "[object Object]") {
+   var _cell = document.createElement("DIV");
+   _cell.style.paddingLeft = "15px";
+   if (_toStr == "[object String]") {
+    _cell.innerHTML = '"' + jsonObj + '"';
+   } else {
+    _cell.innerHTML = jsonObj;
+   }
+   return _cell;
+  }
+  var _div = document.createElement("DIV");
+  _div.className = "jsonDiv";
+  var _start = document.createElement("DIV");
+  _start.innerHTML = "{";
+  _div.appendChild(_start);
+  _div.tabIndex = "0";
+  _div.onfocus = function() {
+   this.style.border = "1px solid #9e9e9e";
+  };
+  _div.onblur = function() {
+   this.style.border = "";
+  };
+  var _split;
+  for (var cel in jsonObj) {
+   // 下一级 json
+   var _cell = document.createElement("DIV");
+   _cell.style.paddingLeft = "15px";
+   _cell.style.whiteSpace = "nowrap";
+   if (Object.prototype.toString.call(jsonObj[cel]) == "[object Object]") {
+    _cell.tabIndex = "0";
+    _cell.onfocus = function() {
+     this.style.border = "1px solid #9e9e9e";
+    };
+    _cell.onblur = function() {
+     this.style.border = "";
+    };
+    var _cellStart = document.createElement("DIV");
+    _cellStart.innerHTML = '"' + cel + '": ';
+    _cell.appendChild(_cellStart);
+    _cell.appendChild(U.drawJson(jsonObj[cel]));
+   } else if (Object.prototype.toString.call(jsonObj[cel]) == "[object Array]") {
+    _cell.tabIndex = "0";
+    _cell.onfocus = function() {
+     this.style.border = "1px solid #9e9e9e";
+    };
+    _cell.onblur = function() {
+     this.style.border = "";
+    };
+    var _cellStart = document.createElement("DIV");
+    _cellStart.innerHTML = '"' + cel + '": [';
+    _cell.appendChild(_cellStart);
+    var _splitArray;
+    for (var int = 0; int < jsonObj[cel].length; int++) {
+     var _arrCel = U.drawJson(jsonObj[cel][int]);
+     _splitArray = document.createElement("SPAN");
+     _splitArray.innerHTML = ",";
+     var _lastChild = _arrCel.lastElementChild || _arrCel;
+     _lastChild.appendChild(_splitArray);
+     _cell.appendChild(_arrCel);
+    }
+    _splitArray && (_splitArray.parentElement.removeChild(_splitArray));
+    var _cellEnd = document.createElement("SPAN");
+    _cellEnd.innerHTML = ']';
+    _cell.appendChild(_cellEnd);
+   } else {
+    _cell.innerHTML = '"' + cel + '": '
+      + (Object.prototype.toString.call(jsonObj[cel]) == "[object String]" ? '"' + jsonObj[cel] + '"' : jsonObj[cel]);
+   }
+   _div.appendChild(_cell);
+   _split = document.createElement("SPAN");
+   _split.innerHTML = ",";
+
+   var findLastElement = _cell;
+   while (findLastElement.lastElementChild) {
+    findLastElement = findLastElement.lastElementChild;
+   }
+   findLastElement.appendChild(_split);
+  }
+  _split && (_split.parentElement.removeChild(_split));
+
+  var _end = document.createElement("DIV");
+  _end.innerHTML = "}";
+  _div.appendChild(_end);
+  return _div;
+ };
+
+ function send() {
+  var msg = document.getElementById("msg");
+  msg.innerHTML = "正在请求数据..";
+  var url = document.getElementById("url").value;
+  var post = document.getElementById("post").value;
+  var responseDIV = document.getElementById("response");
+  responseDIV.innerHTML = "";
+  U.post(url, post, function(res) {
+   var json = JSON.parse(res);
+   responseDIV.innerHTML = "";
+   responseDIV.appendChild(U.drawJson(json));
+   msg.innerHTML = "请求成功";
+  }, function(code) {
+   msg.innerHTML = "请求失败（" + code + "）";
+  });
+ }
+</script>
+</head>
+<body onkeypress="if(event.keyCode == '13') {send()}">
+ <!--   <select size="2" style="overflow: hidden;position: absolute;top:50px;left: 50px;display: none;">
+   <option>abc=she</option>
+  </select> -->
+ <div><label for="url">URL :</label> <input type="text" id="url" placeholder="接口的地址"
+  value="/ddex/AlbumInfo/getAlbumGrid"></div>
+
+ <div><label for="post">POST:</label> <input type="text" id="post"
+  placeholder="请求的参数，例如“albumid=1&name=better man”"></div>
+
+ <div><button onclick="send()">SEND</button></div>
+
+ <div><label for="response">RESPONSE:</label> <span id="msg"></span>
+  <div id="response"></div></div>
+</body>
+</html>

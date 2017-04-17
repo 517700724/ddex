@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>歌曲详细信息</title>
+	<base href="../">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/base.css" rel="stylesheet">
+	<link href="css/albuminfo.css" rel="stylesheet">
+	<script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<script src="js/bootstrap.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="js/base.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			var itemid = base.search.itemid;
+			$.post("ItemInfo/getItemByID",{itemid:itemid},function(data){
+				if(data.responseHeader.status != 00) {
+					alert(data.responseHeader.errorinfo, data.responseHeader.status == 1009 ? function(){base.goLogin();} : null);
+					return;
+				}
+				var items = data.response.docs[0];
+				base.freshNams(items);
+				$("#composer").html(arrayItem(items.composer));
+				$("#producer").html(arrayItem(items.producer));
+				$("#lyricist").html(arrayItem(items.lyricist));
+				$("#artist").html(arrayItem(items.artist));
+			});
+		})
+		function arrayItem(info){
+			var infoItem="";
+			if(info){
+				for(var i=0; i<info.length; i++){
+					infoItem+=info[i].name+", ";
+				}
+				return infoItem.substring(0,infoItem.length-2);		
+			}
+		}
+	</script>
+</head>
+<body>
+	<div style="position: absolute;top: 75px; right: 70px;">
+		<input type="button" value="albuminfo" onclick="base.goSrc('static/albuminfo.html')" class="box-shadow=none background-color=#DFDFDF" disabled="disabled">
+		<input type="button" value="iteminfo" onclick="base.goSrc('static/iteminfo.html')">
+	</div>
+	<div id="album_left_div">
+		<table id="info_table_1">
+			<tr>
+				<td class="info_title">itemID</td>
+				<td class="info" name="itemID" id="itemID"></td>
+			</tr>
+			<tr>
+				<td class="info_title">side</td>
+				<td class="info" name="side" id="side"></td>
+			</tr>
+			<tr>
+				<td class="info_title">trackNumber</td>
+				<td class="info" name="trackNumber" id="trackNumber"></td>
+			</tr>
+			<tr>
+				<td class="info_title">name</td>
+				<td class="info" name="name" id="name"></td>
+			</tr>
+			<tr>
+				<td class="info_title">translateName</td>
+				<td class="info" name="translateName" id="translateName"></td>
+			</tr>
+			<tr>
+				<td class="info_title">pinyinName</td>
+				<td class="info" name="pinyinName" id="pinyinName"></td>
+			</tr>
+			<tr>
+				<td class="info_title">nameKey</td>
+				<td class="info" name="nameKey" id="nameKey"></td>
+			</tr>
+			<tr>
+				<td class="info_title">languageType</td>
+				<td class="info" name="languageType" id="languageType"></td>
+			</tr>
+			<tr>
+				<td class="info_title">duration</td>
+				<td class="info" name="duration" id="duration"></td>
+			</tr>
+			<tr>
+				<td class="info_title">producer</td>
+				<td class="info" id="producer"></td>
+			</tr>
+			<tr>
+				<td class="info_title">composer</td>
+				<td class="info" id="composer"></td>
+			</tr>
+			<tr>
+				<td class="info_title">lyricist</td>
+				<td class="info" name="lyricist" id="lyricist"></td>
+			</tr>
+			<tr>
+				<td class="info_title">explicit</td>
+				<td class="info" name="explicit" id="explicit"></td>
+			</tr>
+			<tr>
+				<td class="info_title">copyright</td>
+				<td class="info" name="copyright" id="copyright"></td>
+			</tr>
+			<tr>
+				<td class="info_title">cpItemID</td>
+				<td class="info" name="cpItemID" id="cpItemID"></td>
+			</tr>
+			<tr>
+				<td class="info_title">isrc</td>
+				<td class="info" name="isrc" id="isrc"></td>
+			</tr>
+			<tr>
+				<td class="info_title">artist</td>
+				<td class="info" id="artist"></td>
+			</tr>
+			<tr>
+				<td class="info_title">genre</td>
+				<td class="info" name="genre" id="genre"></td>
+			</tr>
+			<tr>
+				<td class="info_title">territory</td>
+				<td class="info" name="territory" id="territory"></td>
+			</tr>
+			<tr>
+				<td class="info_title">releaseDate</td>
+				<td class="info" name="releaseDate" id="releaseDate"></td>
+			</tr>
+			<tr>
+				<td class="info_title">statusID</td>
+				<td class="info" name="statusID" id="statusID"></td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>专辑详细信息</title>
+	<base href="../">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/base.css" rel="stylesheet">
+	<link href="css/albuminfo.css" rel="stylesheet">
+	<script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<script src="js/bootstrap.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="js/base.js"></script>
+	<script type="text/javascript" src="js/base-table.js"></script>
+	<script type="text/javascript" src="js/base-popmenu.js"></script>
+	<script type="text/javascript">
+		var img240;
+		var img320;
+		var img600;
+		var img1000; 
+		$(function(){
+			var albumid=base.search.albumid;
+			$.ajax({
+				url:"AlbumInfo/getAlbumByID",
+				type:"POST",
+				data:"albumid="+albumid,
+				dataType:"json",
+				success:function(data){
+					if(data.responseHeader.status != 00) {
+						alert(data.responseHeader.errorinfo, data.responseHeader.status == 1009 ? function(){base.goLogin();} : null);
+						return;
+					}
+				//alert(data.data.name)
+				var album=data.response.docs[0];
+				var albumArtist=album.artistinfo[0].name;
+				var contentProviderName=album.providerinfo.name
+				base.freshNams(album);
+				$("#contentProviderName").html(contentProviderName);
+				var statusID=album.statusID
+				if(statusID==701){
+					$("#alreadyPushStatus").attr("checked","checked");					
+				}else if(statusID==702){
+					$("#putDownStatus").attr("checked","checked");					
+				}else if(statusID==704){
+					$("#exceptionPushStatus").attr("checked","checked");					
+				}else if(statusID==705){
+					$("#failTransStatus").attr("checked","checked");					
+				}else if(statusID==707){
+					$("#notTransStatus").attr("checked","checked");					
+				}else if(statusID==708){
+					$("#transStatus").attr("checked","checked");					
+				}else if(statusID==709){
+					$("#notPushStatus").attr("checked","checked");					
+				}else{
+					$("#exceptionPushStatus").attr("checked","checked");
+				}
+				var explicit=album.explicit;
+				if(explicit==0){
+					$("#explicitNormal").attr("checked","checked");
+				}else{
+					$("#explicit").attr("checked","checked");
+				}
+				$("#albumArtist").html(arrayItem(album.artistinfo));
+				if(album.imageinfo.length>0){
+					$("#uploadFile").attr("disabled","disabled");
+					$("#btnUpload").attr("disabled","disabled");
+					for(var i=0;i<album.imageinfo.length;i++){
+						if(album.imageinfo[i].width==240){
+							img240=album.imageinfo[i].url+"?r="+Math.random();
+						}else if(album.imageinfo[i].width==320){
+							img320=album.imageinfo[i].url+"?r="+Math.random();
+						}else if(album.imageinfo[i].width==600){
+							img600=album.imageinfo[i].url+"?r="+Math.random();
+						}else{
+							img1000=album.imageinfo[i].url+"?r="+Math.random();
+						}
+					}
+				}
+
+
+				if(img320==null){					
+					$("#img320").attr("disabled","disabled").css("color","#dddddd");
+				}
+				if(img600==null){
+					$("#img600").attr("disabled","disabled").css("color","#dddddd");
+				}
+				if(img1000==null){
+					$("#img1000").attr("disabled","disabled").css("color","#dddddd");
+				}
+				$("#pic_view img").attr("src",img240);		
+			}
+		});
+
+
+		});
+
+
+		function uploadImage() {
+			var albumid=base.search.albumid;
+        //判断是否有选择上传文件
+        var imgPath = $("#uploadFile").val();
+        if (imgPath == "") {
+        	alert("请选择上传图片！");
+        	return;
+        }
+        var formData = new FormData($("#form")[0]);
+        formData.append("albumid", albumid);
+        $.ajax({
+        	type: "POST",
+        	url: "AlbumInfo/uploadImg",
+        	data: formData,
+        	cache: false,
+        	processData: false,
+        	contentType: false,
+        	success: function(data) {
+        		if(data.responseHeader.status!=00){
+        			$("#uploadFile").val("");
+        			alert(data.responseHeader.errorinfo);
+        			return;
+        		}else{
+        			alert(data.responseHeader.errorinfo,function(){location.reload();});			
+        		}
+
+        	},
+        	error: function(XMLHttpRequest, textStatus, errorThrown) {
+        		alert("上传失败");
+        	}
+        });
+    }
+
+    function getImg(width){
+
+    	if(img240!=null&&width==240){
+    		$("#pic_view img").attr("src",img240);
+
+    	}else if(img320!=null&&width==320){
+    		$("#pic_view img").attr("src","");
+    		$("#pic_view img").attr("src",img320);
+
+    	}else if(img600!=null&&width==600){
+    		$("#pic_view img").attr("src","");
+    		$("#pic_view img").attr("src",img600);
+
+    		width=380;
+    	}else if(img1000!=null&&width==1000){
+    		$("#pic_view img").attr("src","");
+    		$("#pic_view img").attr("src",img1000);
+
+    		width=450;
+    	}else{
+    		return;
+    	}
+    	$("#pic_view").css("width",width);
+    	$("#pic_view").css("height",width);
+    	$("#pic_view img").css("width",width);
+    	$("#pic_view img").css("height",width);
+    }
+    function arrayItem(info){
+    	var infoItem="";
+    	if(info){
+    		for(var i=0; i<info.length; i++){
+    			infoItem+=info[i].name+", ";
+    		}
+    		return infoItem.substring(0,infoItem.length-2);		
+    	}
+    }
+</script>
+<script type="text/javascript">
+$(function(){
+	if(base.search.statusid == 705){
+		$("#iteminfStatusid").show();
+		$("#iteminfStatusid").click(function(event) {
+			base.changeTo707({
+				statusid:base.search.statusid,
+				albumid:base.search.albumid
+			});
+			/* Act on the event */
+		});
+	}else{
+		$("#iteminfStatusid").hide();
+	}
+})
+</script>
+</head>
+<body>
+	<div style="position: absolute;top: 75px; right: 70px;">
+		<input type="button" name="statusid" id="iteminfStatusid" value="重新转档">
+		<input type="button" value="albuminfo" onclick="base.goSrc('static/albuminfo.html')" class="box-shadow=none background-color=#DFDFDF" disabled="disabled">
+		<input type="button" value="iteminfo" onclick="base.goSrc('static/iteminfo.html')">
+	</div>
+	<div id="album_left_div">
+		<table id="info_table_1">
+			<tr><td class="info_title">Album Id</td> <td class="info" name="albumID" id="albumID"></td></tr>
+			<tr><td class="info_title">Album Name</td> <td class="info" name="name" id="albumName"></td></tr>
+			<tr><td class="info_title">Pinyin Name</td><td class="info" name="pinyinName" id="albumPinyinName"></td></tr>
+			<tr><td class="info_title">Translate Name</td><td class="info" name="translateName" id="albumTranslateName"></td></tr>
+			<tr><td class="info_title">Name Key</td><td class="info" name="nameKey" id="albumNameKey"></td></tr>
+			<tr><td class="info_title">UPC</td><td class="info" name="icpn" id="albumUpc"></td></tr>
+			<tr><td class="info_title">ICPN</td><td class="info" name="icpn" id="albumIcpn"></td></tr>
+			<tr><td class="info_title">Release Date</td><td class="info" name="releaseDate" id="albumReleaseDate"></td></tr>
+			<tr><td class="info_title">Disk #</td><td class="info" name="disk" id="albumDisk">1</td></tr>
+			<tr><td class="info_title">No. of tracks</td><td class="info" name="noOfTracks" id="albumNoOfTracks"></td></tr>
+			<tr><td class="info_title">Album Price Code</td><td class="info" name="albumPrice" id="albumAlbumPrice"></td></tr>
+			<tr><td class="info_title">Album Rating</td><td class="info" name="rating" id="albumRating">1</td></tr>
+			<tr><td class="info_title">Artist</td><td class="info" name="albumArtist" id="albumArtist"></td></tr>
+			<tr><td class="info_title">Status</td><td class="info">
+				<span>已推送</span><input type="radio" name="status" id="alreadyPushStatus" disabled="disabled">&nbsp;&nbsp;
+				<span>下架</span><input type="radio" name="status" id="putDownStatus" disabled="disabled">&nbsp;&nbsp;
+				<span>正在推送</span><input type="radio" name="status" id="exceptionPushStatus" disabled="disabled">&nbsp;&nbsp;
+				<span>转档失败</span><input type="radio" name="status" id="failTransStatus" disabled="disabled">&nbsp;&nbsp;<br/>
+				<span>未转档</span><input type="radio" name="status" id="notTransStatus" disabled="disabled">&nbsp;&nbsp;
+				<span>正在转档</span><input type="radio" name="status" id="transStatus" disabled="disabled">&nbsp;&nbsp;
+				<span>未推送</span><input type="radio" name="status" id="notPushStatus" disabled="disabled">
+			</td></tr>
+			<tr><td class="info_title">Language Type</td><td class="info" name="languageType" id="albumLanguage"></td></tr>
+			<tr><td class="info_title">Genre</td><td class="info" name="genre" id="albumGenre"></td></tr>
+			<tr><td class="info_title">Explicit</td><td class="info">
+				<span>NORMAL</span><input type="radio" id="explicitNormal" name="explicit" disabled="disabled">&nbsp;&nbsp;
+				<span>EXPLICIT</span><input type="radio" id="explicit" name="explicit" disabled="disabled"></td></tr>
+				<tr><td class="info_title">Content Provider</td><td class="info" id="contentProviderName"></td></tr>
+				<tr><td class="info_title">Album Description</td><td class="info" name="description" id="albumDescription"></td></tr>
+			</table>
+		</div>
+		<div id="album_right_div">
+			<div id="pic_detailed">
+				<div id="pic_view"><img src=""></div>
+				<div id="pic_info" style="margin-left:0;">
+					<p><a id="img240" href="javascript:getImg(240)">JPG(240x240)</a></p>
+					<p><a id="img320" href="javascript:getImg(320)">JPG(320x320)</a></p>
+					<p><a id="img600" href="javascript:getImg(600)">JPG(600x600)</a></p>
+					<p><a id="img1000" href="javascript:getImg(1000)">JPG(1000x1000)</a></p>
+				</div>
+				<form id="form" enctype="multipart/form-data" method="post">
+					<input type="file" id="uploadFile" name="image" runat="server" enctype="multipart/form-data" accept="image/*" style="border:none;"/>
+					<input type="button" id="btnUpload" value="确定	" onclick="uploadImage()" />
+				</form>
+			</div>
+		</div>
+		<div style="height:0; clear:both; display:block; width:100%;"></div>
+		<div id="album_down_div">
+			<table>
+				<tr><td class="info_title">Headline</td><td class="info"></td></tr>
+				<tr><td class="info_title">Description</td><td class="info"></td></tr>
+				<tr><td class="info_title">Alternate Headline</td><td class="info"></td></tr>
+				<tr><td class="info_title">Alternate Description</td><td class="info"></td></tr>
+			</table>
+		</div>
+	</body>
+	</html>

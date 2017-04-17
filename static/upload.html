@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>文件上传测试</title>
+</head>
+<body>
+<form id="form" action="../AlbumInfo/uploadImg" enctype="multipart/form-data" method="post">
+专辑ID：<input type="text" name="albumid" value="1"><br/>
+ 文件：<input type="file" name="image" accept="image/*">
+</form>
+<input type="button" value="上传" onclick="upload();">
+<div>
+ 图片：
+ <ul id="imgList"></ul>
+</div>
+<script type="text/javascript">
+ function upload() {
+  if (document.getElementsByName("image")[0].files.length != 1) {
+   alert("未选择文件");
+   return;
+  }
+  var ajax = new XMLHttpRequest();
+  ajax.onreadystatechange = function() {
+   if (4 != ajax.readyState) {
+    return;
+   }
+   if (200 != ajax.status) {
+    alert("错误：" + ajax.status);
+    return;
+   }
+   // 上传成功
+   var json = JSON.parse(ajax.responseText);
+   if (json.responseHeader.status != "00") {
+    alert(json.responseHeader.errorinfo);
+    return;
+   }
+   var imgs = json.response.docs;
+   var imgList = document.getElementById("imgList");
+   imgList.innerHTML = "";
+   for (var int = 0; int < imgs.length; int++) {
+    var img = imgs[int];
+    imgList.innerHTML += "<li>"+img.width+"*"+img.height+"-"+img.codec+"<img src='"+img.url+"'/></li>";
+   }
+  };
+  ajax.open("POST", "../AlbumInfo/uploadImg", true);
+  ajax.send(new FormData(document.getElementById("form")));
+ }
+</script>
+</body>
+</html>

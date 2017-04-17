@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>bootstrap test</title>
+<base href="/trunk/">
+<link href="css/base.css" rel="stylesheet">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/base.js"></script>
+<script type="text/javascript" src="js/base-table.js"></script>
+<script type="text/javascript" src="js/base-popmenu.js"></script>
+</head>
+<body>
+ <div>表格</div>
+  <div id="table" class="width=400px margin=10px"></div>
+  <script type="text/javascript">
+   window.addEventListener("load", function() {
+    var table = new Table({id:"table",table:{title:"这是一个表格"},head:{html:"表格标题"}});
+    table.createHeads([{html:"姓名",key:"name"},{html:"年龄",key:"age"},{html:"性别",key:"gander"}]);
+    var row = table.createRow();
+    table.createRowCells({age:18,name:"Ric",gander:"男"});
+    table.createRowCells({age:18,name:"Ric",gander:"男"});
+    table.createRowCells({age:18,name:"Ric",gander:"男"});
+    table.createRowCells({age:19,name:"Ric",gander:"男"});
+    table.createRowCells({age:20,name:"Ric"}).createCell({html:"男",id:"ss"});
+    table.initDom();
+    table.freshData();
+   });
+  </script>
+   <nav style="margin:10px 0 0 0;" id="foot_bar" class="center"><ul class="pagination pagination-sm">
+    <li><a href="javascript:">1</a></li>
+    <li><a href="javascript:">2</a></li>
+    <li><a href="javascript:">3</a></li>
+    <li><a href="javascript:">4</a></li>
+    <li><a href="javascript:">5</a></li></ul></nav>
+ <br>
+ <div>来复框</div>
+ <div class="panel-group width=200px margin=10px" id="tree_panel" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <div class="panel-title">
+        <div role="button" data-toggle="collapse" data-parent="#tree_panel" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          Item #1
+        </div>
+      </div>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+       <ul class="list-group">
+        <li class="list-group-item click">Cras justo odio</li>
+        <li class="list-group-item click">Dapibus ac facilisis in</li>
+        <li class="list-group-item click">Morbi leo risus</li>
+        <li class="list-group-item click">Porta ac consectetur ac</li>
+        <li class="list-group-item click">Vestibulum at eros</li>
+       </ul>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingTwo">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#tree_panel" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          Item #2
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+      <div class="panel-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="menu">右键菜单</div>
+ <script type="text/javascript">
+  window.addEventListener("load", function() {
+   new PopMenu({id:"menu",items:[{html:"haha",click:function(ep,ec){
+    alert(ep.outerHTML);
+    alert(ec.outerHTML);
+    }},{html:"hzhz"}]});
+  });
+ </script>
+</body>
+</html>
